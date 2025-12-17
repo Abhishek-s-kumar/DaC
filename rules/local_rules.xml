@@ -1,8 +1,6 @@
 <!-- Local rules -->
 
 <!-- Modify it at your will. -->
-<!-- Copyright (C) 2015, Wazuh Inc. -->
-
 <!-- Example -->
 <group name="local,syslog,sshd,">
 
@@ -16,4 +14,103 @@
     <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,</group>
   </rule>
 
+</group>
+
+<!-- ===============================
+ PowerShell Script Block Logging
+================================ -->
+<group name="windows,powershell,execution">
+  <rule id="100100" level="12">
+    <field name="win.system.eventID">4104</field>
+    <description>PowerShell Script Block Execution Detected</description>
+    <mitre>T1059.001</mitre>
+  </rule>
+
+  <rule id="100101" level="15">
+    <if_matched_sid>100100</if_matched_sid>
+    <match>Invoke-Expression|IEX|DownloadString|FromBase64String</match>
+    <description>Suspicious PowerShell Script Block (Possible Fileless Malware)</description>
+    <mitre>T1059.001</mitre>
+  </rule>
+</group>
+
+<!-- ===============================
+ PowerShell Transcription Logs
+================================ -->
+<group name="windows,powershell,transcription">
+  <rule id="100110" level="10">
+    <match>C:\\PS_Transcription_Logs\\</match>
+    <description>PowerShell Transcription Log Collected</description>
+    <mitre>T1059.001</mitre>
+  </rule>
+</group>
+
+<!-- ===============================
+ Windows Defender
+================================ -->
+<group name="windows,defender,av">
+  <rule id="100120" level="14">
+    <field name="win.system.eventID">1116|1117|5001</field>
+    <description>Windows Defender Malware Detection or Action</description>
+    <mitre>T1566</mitre>
+  </rule>
+</group>
+
+<!-- ===============================
+ Sysmon
+================================ -->
+<group name="windows,sysmon,custom">
+  <rule id="100130" level="12">
+    <field name="win.system.providerName">Microsoft-Windows-Sysmon</field>
+    <description>Custom Sysmon telemetry observed (lab validation rule)</description>
+    <mitre>
+      <id>T1059</id>
+    </mitre>
+    <options>no_full_log</options>
+  </rule>
+</group>
+
+<!-- ===============================
+ Scheduled Tasks (Persistence)
+================================ -->
+<group name="windows,persistence,services">
+  <rule id="100180" level="13">
+    <field name="win.system.eventID">7040</field>
+    <description>Service startup type changed (possible persistence)</description>
+    <mitre>T1543.003</mitre>
+  </rule>
+</group>
+
+<!-- ===============================
+ WMI Activity
+================================ -->
+<group name="windows,wmi">
+  <rule id="100150" level="12">
+    <field name="win.system.eventID">5857|5858</field>
+    <description>WMI Activity Detected</description>
+    <mitre>T1047</mitre>
+  </rule>
+</group>
+
+<!-- ===============================
+ DNS Client (C2 Visibility)
+================================ -->
+<group name="windows,dns">
+  <rule id="100160" level="10">
+    <field name="win.system.providerName">Microsoft-Windows-DNS-Client</field>
+    <field name="win.system.eventID">1014</field>
+    <description>DNS name resolution timeout (possible WPAD abuse or DNS issue)</description>
+    <mitre>T1071.004</mitre>
+  </rule>
+</group>
+
+<!-- ===============================
+ RDP Activity
+================================ -->
+<group name="windows,rdp">
+  <rule id="100170" level="12">
+    <field name="win.system.eventID">21|22|25|4624|4634</field>
+    <description>RDP Session or Login Activity Detected</description>
+    <mitre>T1021.001</mitre>
+  </rule>
 </group>
